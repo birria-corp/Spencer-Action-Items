@@ -126,7 +126,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div id="root"></div>
 <script type="text/babel">
 
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.4';
 const LS_KEY      = 'skt_todo_v1';
 const LS_EXPORT   = 'skt_last_export';
 
@@ -360,8 +360,8 @@ function TaskRow({item, onOpen, onToggle, onBump}) {
 
 // ── APP ───────────────────────────────────────────────────────────────────
 const LS_FS = 'skt_fontsize';
-const FS_STEPS  = ['12px','13px','14px','15px','16px','18px','20px'];
-const FS_DEFAULT = 3; // index → 15px default
+const FS_STEPS  = [75, 85, 92, 100, 108, 116, 125];
+const FS_DEFAULT = 3;
 
 function App() {
   const stored = loadData();
@@ -376,8 +376,10 @@ function App() {
     try { const s=localStorage.getItem(LS_FS); return s!=null?Number(s):FS_DEFAULT; } catch(_){return FS_DEFAULT;}
   });
 
-  const fsDown = () => setFsIdx(i=>{ const n=Math.max(0,i-1); try{localStorage.setItem(LS_FS,n);}catch(_){} return n; });
-  const fsUp   = () => setFsIdx(i=>{ const n=Math.min(FS_STEPS.length-1,i+1); try{localStorage.setItem(LS_FS,n);}catch(_){} return n; });
+  const fsDown = () => setFsIdx(i=>{ const n=Math.max(0,i-1); document.documentElement.style.fontSize=FS_STEPS[n]+'%'; try{localStorage.setItem(LS_FS,n);}catch(_){} return n; });
+  const fsUp   = () => setFsIdx(i=>{ const n=Math.min(FS_STEPS.length-1,i+1); document.documentElement.style.fontSize=FS_STEPS[n]+'%'; try{localStorage.setItem(LS_FS,n);}catch(_){} return n; });
+
+  React.useEffect(()=>{ document.documentElement.style.fontSize = FS_STEPS[fsIdx]+'%'; },[]);
 
   React.useEffect(()=>{ saveData(items); },[items]);
 
@@ -474,7 +476,7 @@ function App() {
   const overdueCount = todos.filter(i=>i.dueDate && i.dueDate < today()).length;
 
   return (
-    <div style={{fontSize:FS_STEPS[fsIdx]}}>
+    <>
       {/* TOP BAR */}
       <header className="topbar">
         <span className="topbar-brand">Spencer Action Items</span>
@@ -570,7 +572,7 @@ function App() {
 
       {/* TOAST */}
       {toast && <div className="toast">{toast}</div>}
-    </div>
+    </>
   );
 }
 
