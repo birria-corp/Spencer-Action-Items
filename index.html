@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0d0e14"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SKT Todo"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>Spencer Action Items</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0e14;--surface:#13151f;--surface2:#1c1f2e;--surface3:#232738;
+  --border:#2a2e44;--border2:#353a55;
+  --text:#dde3f0;--muted:#6b7499;
+  --accent:#5b7cf6;--accent2:#3d5ee0;
+  --red:#ef4444;--yellow:#eab308;--green:#22c55e;
+  --radius:8px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh}
+
+/* TOP BAR */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
+.topbar-brand{font-size:0.8rem;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:var(--accent);flex-shrink:0}
+.topbar-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+.topbar-right{display:flex;gap:6px;align-items:center;margin-left:auto}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:0.74rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s;white-space:nowrap}
+.btn:hover{background:var(--surface3);border-color:var(--accent)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-danger{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.07)}
+.btn-danger:hover{background:rgba(239,68,68,.15)}
+.btn-success{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.07)}
+.btn-success:hover{background:rgba(34,197,94,.15)}
+.btn-sm{padding:3px 9px;font-size:0.69rem}
+.btn-xs{padding:2px 7px;font-size:0.65rem}
+.btn-icon{padding:5px 8px;font-size:0.82rem;border-radius:5px}
+
+/* PAGE */
+.page{padding:16px 16px 40px;max-width:720px;margin:0 auto}
+
+/* ADD AREA */
+.add-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
+.add-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}
+.add-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:0.9rem;font-family:inherit}
+.add-input:focus{outline:none;border-color:var(--accent)}
+.add-date{width:130px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:0.82rem;font-family:inherit}
+.add-date:focus{outline:none;border-color:var(--accent)}
+.quick-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.quick-label{font-size:0.68rem;color:var(--muted);flex-shrink:0}
+.qbtn{padding:3px 9px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--yellow);font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s}
+.qbtn:hover{background:var(--surface3);border-color:var(--yellow)}
+.qbtn.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+
+/* SECTION */
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;margin-top:24px}
+.section-label{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)}
+.section-rule{flex:1;height:1px;background:var(--border)}
+.section-count{font-size:0.63rem;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
+
+/* TASK ROWS */
+.task-list{display:flex;flex-direction:column;gap:5px}
+.task-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;transition:border-color .12s;cursor:pointer}
+.task-row:hover{border-color:var(--border2)}
+.task-row.completed-row{opacity:.65}
+.task-check{flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.task-text{flex:1;font-size:0.88rem;line-height:1.45;min-width:0;word-break:break-word}
+.task-text.done{text-decoration:line-through;color:var(--muted)}
+.task-date{flex-shrink:0;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.date-past{color:var(--red);background:rgba(239,68,68,.1)}
+.date-today{color:var(--yellow);background:rgba(234,179,8,.1)}
+.date-future{color:var(--green);background:rgba(34,197,94,.1)}
+.date-none{color:var(--muted);background:var(--surface2)}
+.task-notes-preview{font-size:0.72rem;color:var(--muted);margin-top:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.task-body{flex:1;min-width:0}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;backdrop-filter:blur(2px)}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:100vw;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column}
+.drawer-hd{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.drawer-hd-title{font-size:0.9rem;font-weight:700;flex:1}
+.drawer-bd{flex:1;overflow-y:auto;padding:16px 18px}
+.drawer-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:4px}
+.field input,.field textarea,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:7px 9px;font-size:0.83rem;font-family:inherit;transition:border-color .12s}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.55}
+.bump-row{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+
+/* EMPTY */
+.empty{padding:20px 12px;text-align:center;color:var(--muted);font-size:0.8rem}
+
+/* MODAL */
+.overlay-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:0.92rem;font-weight:700;margin-bottom:14px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#0d1a0d;font-size:0.75rem;font-weight:700;padding:7px 16px;border-radius:20px;z-index:500;white-space:nowrap;pointer-events:none;transition:opacity .3s}
+.toast.hide{opacity:0}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const APP_VERSION = '1.0';
+const LS_KEY      = 'skt_todo_v1';
+const LS_EXPORT   = 'skt_last_export';
+
+const uid   = () => Math.random().toString(36).slice(2,10);
+const today = () => new Date().toISOString().split('T')[0];
+const nowTs = () => new Date().toISOString();
+
+// ── DATE HELPERS ──────────────────────────────────────────────────────────
+const parseLocal = str => {
+  if (!str) return null;
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y,m-1,d);
+};
+const fmtDisplay = str => {
+  if (!str) return '';
+  const d = parseLocal(str);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+};
+const dueCls = str => {
+  if (!str) return 'date-none';
+  const t = today();
+  if (str < t) return 'date-past';
+  if (str === t) return 'date-today';
+  return 'date-future';
+};
+const addBusinessDays = (dateStr, n) => {
+  const d = parseLocal(dateStr) || new Date();
+  let added = 0;
+  while (added < n) {
+    d.setDate(d.getDate()+1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return d.toISOString().split('T')[0];
+};
+const offsetFromToday = days => {
+  const d = new Date();
+  d.setDate(d.getDate()+days);
+  return d.toISOString().split('T')[0];
+};
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────
+const loadData = () => { try { const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; } catch(_){return null;} };
+const saveData = items => { try { localStorage.setItem(LS_KEY,JSON.stringify(items)); } catch(_){} };
+
+// ── BLANK ITEM ────────────────────────────────────────────────────────────
+const blankItem = () => ({ id:uid(), text:'', dueDate:'', notes:'', completed:false, completedDate:'', createdAt:today() });
+
+// ── SORT ──────────────────────────────────────────────────────────────────
+const sortTodos = items => [...items].sort((a,b) => {
+  // overdue first, then today, then future, then no date
+  const rank = s => !s ? 3 : s < today() ? 0 : s === today() ? 1 : 2;
+  const r = rank(a.dueDate) - rank(b.dueDate);
+  if (r !== 0) return r;
+  return (a.dueDate||'9999') < (b.dueDate||'9999') ? -1 : 1;
+});
+const sortDone = items => [...items].sort((a,b)=>(b.completedDate||'').localeCompare(a.completedDate||''));
+
+// ── IMPORT MODAL ──────────────────────────────────────────────────────────
+function ImportModal({onClose, onImport}) {
+  const [status, setStatus] = React.useState(null);
+  const fileRef = React.useRef();
+
+  React.useEffect(()=>{
+    const h = e => { if(e.key==='Escape') onClose(); };
+    window.addEventListener('keydown',h);
+    return ()=>window.removeEventListener('keydown',h);
+  },[onClose]);
+
+  const parse = text => {
+    try {
+      const data = JSON.parse(text);
+      const arr = Array.isArray(data) ? data : data.items;
+      if (!Array.isArray(arr)) { setStatus({ok:false,msg:'Invalid file — no items array found.'}); return; }
+      setStatus({ok:true, msg:`Ready — ${arr.length} items. This will replace your current list.`, data:arr});
+    } catch(e) { setStatus({ok:false, msg:'Could not parse JSON: '+e.message}); }
+  };
+
+  return (
+    <div className="overlay-modal">
+      <div className="modal">
+        <div className="modal-title">Import from JSON</div>
+        <div style={{fontSize:'0.78rem',color:'var(--muted)',marginBottom:14}}>
+          Select a previously exported <code style={{background:'var(--surface2)',padding:'1px 5px',borderRadius:3}}>.json</code> file or paste JSON below.
+        </div>
+        <div style={{marginBottom:10}}>
+          <input ref={fileRef} type="file" accept=".json" onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>parse(ev.target.result);r.readAsText(f);}} style={{display:'none'}}/>
+          <button className="btn btn-sm" onClick={()=>fileRef.current.click()}>📂 Choose File</button>
+        </div>
+        <div className="field">
+          <label>Or paste JSON</label>
+          <textarea onChange={e=>parse(e.target.value)} placeholder='[{"id":"...","text":"..."}]' style={{fontFamily:'monospace',fontSize:'0.74rem',minHeight:90}}/>
+        </div>
+        {status && (
+          <div style={{padding:'7px 11px',borderRadius:6,fontSize:'0.77rem',marginBottom:12,background:status.ok?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)',border:`1px solid ${status.ok?'rgba(34,197,94,.3)':'rgba(239,68,68,.3)'}`,color:status.ok?'var(--green)':'var(--red)'}}>
+            {status.ok?'✓ ':'✕ '}{status.msg}
+          </div>
+        )}
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+          <button className="btn btn-sm" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary btn-sm" disabled={!status?.ok} onClick={()=>{onImport(status.data);onClose();}} style={{opacity:status?.ok?1:.4,cursor:status?.ok?'pointer':'default'}}>Import &amp; Replace</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── TASK DRAWER ───────────────────────────────────────────────────────────
+function TaskDrawer({item, onClose, onSave, onDelete}) {
+  const [f, setF] = React.useState({...item});
+  const set = (k,v) => setF(p=>({...p,[k]:v}));
+  const [quickActive, setQuickActive] = React.useState(null);
+
+  React.useEffect(()=>{
+    const h = e => { if(e.key==='Escape') onClose(); };
+    window.addEventListener('keydown',h);
+    return ()=>window.removeEventListener('keydown',h);
+  },[onClose]);
+
+  const setQuick = (days, label) => {
+    set('dueDate', offsetFromToday(days));
+    setQuickActive(label);
+  };
+  const submit = () => {
+    if (!f.text.trim()) return;
+    onSave(f);
+    onClose();
+  };
+  const toggleComplete = () => {
+    const nowDone = !f.completed;
+    setF(p=>({...p, completed:nowDone, completedDate:nowDone?today():''}));
+  };
+
+  const dc = dueCls(f.dueDate);
+
+  return (
+    <>
+      <div className="drawer-overlay" onClick={onClose}/>
+      <div className="drawer">
+        <div className="drawer-hd">
+          <div className="drawer-hd-title">{item._isNew ? 'New Item' : 'Edit Item'}</div>
+          <button className="btn btn-icon" onClick={onClose}>✕</button>
+        </div>
+        <div className="drawer-bd">
+          <div className="field">
+            <label>Action Item *</label>
+            <textarea value={f.text} onChange={e=>set('text',e.target.value)} autoFocus placeholder="What needs to be done?" style={{minHeight:64}}/>
+          </div>
+          <div className="field">
+            <label>Due Date</label>
+            <input type="date" value={f.dueDate} onChange={e=>{set('dueDate',e.target.value);setQuickActive(null);}}/>
+            {f.dueDate && (
+              <div style={{marginTop:5}}>
+                <span className={'task-date '+dc}>{fmtDisplay(f.dueDate)}</span>
+              </div>
+            )}
+            <div className="bump-row">
+              {[['Today',0],['Tomorrow',1],['+1 Wk',7],['+2 Wks',14],['+1 Mo',30]].map(([label,days])=>(
+                <button key={label} className={'qbtn'+(quickActive===label?' active':'')} onClick={()=>setQuick(days,label)}>{label}</button>
+              ))}
+              {!f.completed && f.dueDate && (
+                <>
+                  <button className="qbtn" onClick={()=>{set('dueDate',addBusinessDays(f.dueDate,1));setQuickActive(null);}}>+1 Day</button>
+                  <button className="qbtn" onClick={()=>{set('dueDate',addBusinessDays(f.dueDate,5));setQuickActive(null);}}>+1 Wk ↷</button>
+                </>
+              )}
+              {f.dueDate && <button className="qbtn" style={{color:'var(--muted)'}} onClick={()=>{set('dueDate','');setQuickActive(null);}}>Clear</button>}
+            </div>
+          </div>
+          <div className="field">
+            <label>Notes</label>
+            <textarea value={f.notes||''} onChange={e=>set('notes',e.target.value)} placeholder="Additional context, links, or details…"/>
+          </div>
+          {!item._isNew && (
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderTop:'1px solid var(--border)',marginTop:4}}>
+              <span style={{fontSize:'0.78rem',color:'var(--muted)',flex:1}}>{f.completed?`Completed ${f.completedDate||''}`:''}</span>
+              <button className={f.completed?'btn btn-sm':'btn btn-success btn-sm'} onClick={toggleComplete}>
+                {f.completed ? '↩ Reopen' : '✓ Mark Complete'}
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="drawer-ft">
+          <button className="btn btn-danger btn-sm" onClick={()=>{if(window.confirm('Delete this item?')){onDelete(f.id);onClose();}}}>Delete</button>
+          <button className="btn btn-sm" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary btn-sm" onClick={submit}>Save</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── TASK ROW ──────────────────────────────────────────────────────────────
+function TaskRow({item, onOpen, onToggle}) {
+  const dc = dueCls(item.dueDate);
+  return (
+    <div className={'task-row'+(item.completed?' completed-row':'')} onClick={()=>onOpen(item)}>
+      <input
+        type="checkbox"
+        className="task-check"
+        checked={item.completed}
+        onChange={e=>{e.stopPropagation();onToggle(item.id);}}
+        onClick={e=>e.stopPropagation()}
+      />
+      <div className="task-body">
+        <div className={'task-text'+(item.completed?' done':'')}>{item.text}</div>
+        {item.notes && !item.completed && (
+          <div className="task-notes-preview">{item.notes}</div>
+        )}
+      </div>
+      {item.dueDate && (
+        <span className={'task-date '+dc}>{fmtDisplay(item.dueDate)}</span>
+      )}
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────
+function App() {
+  const stored = loadData();
+  const [items,      setItems]      = React.useState(()=> stored || []);
+  const [drawer,     setDrawer]     = React.useState(null);
+  const [showImport, setShowImport] = React.useState(false);
+  const [toast,      setToast]      = React.useState(null);
+  const [quickActive, setQuickActive] = React.useState(null);
+  const [newText,    setNewText]    = React.useState('');
+  const [newDate,    setNewDate]    = React.useState('');
+
+  React.useEffect(()=>{ saveData(items); },[items]);
+
+  const showToast = msg => { setToast(msg); setTimeout(()=>setToast(null),2200); };
+
+  // ── AUTO EXPORT ──
+  const exportData = React.useCallback((silent=false) => {
+    const payload = { _meta:{exportedAt:nowTs(),version:APP_VERSION,itemCount:items.length}, items };
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'spencer-action-items-'+today()+'.json';
+    a.click();
+    try { localStorage.setItem(LS_EXPORT,today()); } catch(_){}
+    if (!silent) showToast('✓ Exported '+items.length+' items');
+  },[items]);
+
+  React.useEffect(()=>{
+    if (items.length===0) return;
+    try {
+      const last = localStorage.getItem(LS_EXPORT);
+      if (!last) { exportData(true); return; }
+      const days = (new Date(today())-new Date(last))/(1000*60*60*24);
+      if (days >= 4) exportData(true);
+    } catch(_){}
+  },[]);
+
+  // ── VERSION CHECK ──
+  const checkUpdate = async () => {
+    try {
+      const res = await fetch('version.json?nc='+Date.now());
+      const data = await res.json();
+      const remote = String(data.version).trim();
+      if (remote !== APP_VERSION) {
+        if (window.confirm(`v${remote} available (you have v${APP_VERSION}). Reload now?`)) window.location.reload(true);
+      } else {
+        showToast('✓ Already on latest (v'+APP_VERSION+')');
+      }
+    } catch(_){ showToast('Could not check for updates'); }
+  };
+
+  // ── CRUD ──
+  const saveItem = item => {
+    setItems(prev=>{
+      const exists = prev.find(i=>i.id===item.id);
+      return exists ? prev.map(i=>i.id===item.id?item:i) : [...prev,item];
+    });
+  };
+  const deleteItem = id => setItems(p=>p.filter(i=>i.id!==id));
+  const toggleItem = id => {
+    setItems(prev=>prev.map(i=>{
+      if(i.id!==id) return i;
+      const nowDone = !i.completed;
+      return {...i, completed:nowDone, completedDate:nowDone?today():''};
+    }));
+  };
+
+  // ── QUICK ADD ──
+  const quickAdd = () => {
+    if (!newText.trim()) return;
+    const item = {...blankItem(), text:newText.trim(), dueDate:newDate};
+    setItems(p=>[...p,item]);
+    setNewText(''); setNewDate(''); setQuickActive(null);
+  };
+  const setQuick = (days, label) => {
+    setNewDate(offsetFromToday(days));
+    setQuickActive(label);
+  };
+
+  // ── IMPORT ──
+  const importData = arr => {
+    const sanitized = arr.map(i=>({
+      id:        i.id||uid(),
+      text:      i.text||'',
+      dueDate:   i.dueDate||'',
+      notes:     i.notes||'',
+      completed: !!i.completed,
+      completedDate: i.completedDate||'',
+      createdAt: i.createdAt||today(),
+    }));
+    setItems(sanitized);
+    showToast('✓ Imported '+sanitized.length+' items');
+  };
+
+  const todos = sortTodos(items.filter(i=>!i.completed));
+  const dones = sortDone(items.filter(i=>i.completed));
+  const overdueCount = todos.filter(i=>i.dueDate && i.dueDate < today()).length;
+
+  return (
+    <>
+      {/* TOP BAR */}
+      <header className="topbar">
+        <span className="topbar-brand">Spencer Action Items</span>
+        {overdueCount > 0 && (
+          <span style={{fontSize:'0.65rem',fontWeight:800,color:'var(--red)',background:'rgba(239,68,68,.12)',border:'1px solid rgba(239,68,68,.3)',borderRadius:20,padding:'1px 8px',flexShrink:0}}>
+            {overdueCount} overdue
+          </span>
+        )}
+        <div className="topbar-right">
+          <span style={{fontSize:'0.62rem',color:'var(--muted)'}}>v{APP_VERSION}</span>
+          <button className="btn btn-sm" onClick={checkUpdate}>↻</button>
+          <div className="topbar-sep"/>
+          <button className="btn btn-sm" onClick={()=>exportData(false)}>⬇ Export</button>
+          <button className="btn btn-sm" onClick={()=>setShowImport(true)}>⬆ Import</button>
+        </div>
+      </header>
+
+      <div className="page">
+        {/* ADD CARD */}
+        <div className="add-card">
+          <div className="add-row">
+            <input
+              className="add-input"
+              value={newText}
+              onChange={e=>setNewText(e.target.value)}
+              placeholder="Add an action item…"
+              onKeyDown={e=>{ if(e.key==='Enter') quickAdd(); }}
+            />
+            <input
+              type="date"
+              className="add-date"
+              value={newDate}
+              onChange={e=>{setNewDate(e.target.value);setQuickActive(null);}}
+            />
+            <button className="btn btn-primary" onClick={quickAdd}>Add</button>
+          </div>
+          <div className="quick-row">
+            <span className="quick-label">Quick date:</span>
+            {[['Today',0],['Tomorrow',1],['+1 Wk',7],['+2 Wks',14],['+1 Mo',30]].map(([label,days])=>(
+              <button key={label} className={'qbtn'+(quickActive===label?' active':'')} onClick={()=>setQuick(days,label)}>{label}</button>
+            ))}
+            {newDate && <button className="qbtn" style={{color:'var(--muted)'}} onClick={()=>{setNewDate('');setQuickActive(null);}}>Clear</button>}
+          </div>
+        </div>
+
+        {/* ACTIVE TASKS */}
+        <div className="section-head">
+          <span className="section-label">Active</span>
+          <div className="section-rule"/>
+          <span className="section-count">{todos.length}</span>
+        </div>
+        <div className="task-list">
+          {todos.length===0 && <div className="empty">No active items. Add one above.</div>}
+          {todos.map(item=>(
+            <TaskRow key={item.id} item={item} onOpen={i=>setDrawer(i)} onToggle={toggleItem}/>
+          ))}
+        </div>
+
+        {/* COMPLETED */}
+        {dones.length > 0 && (
+          <>
+            <div className="section-head">
+              <span className="section-label">Completed</span>
+              <div className="section-rule"/>
+              <span className="section-count">{dones.length}</span>
+            </div>
+            <div className="task-list">
+              {dones.map(item=>(
+                <TaskRow key={item.id} item={item} onOpen={i=>setDrawer(i)} onToggle={toggleItem}/>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* DRAWER */}
+      {drawer && (
+        <TaskDrawer
+          item={drawer}
+          onClose={()=>setDrawer(null)}
+          onSave={saveItem}
+          onDelete={deleteItem}
+        />
+      )}
+
+      {/* IMPORT MODAL */}
+      {showImport && <ImportModal onClose={()=>setShowImport(false)} onImport={importData}/>}
+
+      {/* TOAST */}
+      {toast && <div className="toast">{toast}</div>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+// ── SERVICE WORKER REGISTRATION ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
