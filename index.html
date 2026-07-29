@@ -360,8 +360,8 @@ function TaskRow({item, onOpen, onToggle, onBump}) {
 
 // ── APP ───────────────────────────────────────────────────────────────────
 const LS_FS = 'skt_fontsize';
-const FS_STEPS = [0.85, 0.92, 1.0, 1.08, 1.16, 1.25];
-const FS_DEFAULT = 2; // index into FS_STEPS → 1.0rem
+const FS_STEPS  = ['12px','13px','14px','15px','16px','18px','20px'];
+const FS_DEFAULT = 3; // index → 15px default
 
 function App() {
   const stored = loadData();
