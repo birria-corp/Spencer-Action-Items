@@ -22,9 +22,8 @@
   --accent:#5b7cf6;--accent2:#3d5ee0;
   --red:#ef4444;--yellow:#eab308;--green:#22c55e;
   --radius:8px;
-  --fs:1rem;
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;font-size:var(--fs)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh}
 
 /* TOP BAR */
 .topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
@@ -378,7 +377,7 @@ function App() {
   });
 
   React.useEffect(()=>{
-    document.documentElement.style.setProperty('--fs', FS_STEPS[fsIdx]+'rem');
+    document.documentElement.style.fontSize = FS_STEPS[fsIdx]+'rem';
     try { localStorage.setItem(LS_FS, fsIdx); } catch(_){}
   },[fsIdx]);
 
