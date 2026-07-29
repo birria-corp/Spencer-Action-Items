@@ -2,7 +2,7 @@
 // Cache name includes version. On every install, old caches are purged automatically.
 // To force an update: bump CACHE_VERSION (must match APP_VERSION in index.html).
 
-const CACHE_VERSION = '1.2';
+const CACHE_VERSION = '1.3';
 const CACHE_NAME    = `skt-todo-v${CACHE_VERSION}`;
 
 const PRECACHE = [
