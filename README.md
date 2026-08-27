@@ -48,7 +48,7 @@ Personal task manager with cloud sync via Firebase Auth + Firestore.
 
 | Version | Changes |
 |---------|---------|
-| v1.7 | Fix font size buttons (HTML entity minus broke Babel compilation) |
+| v1.8 | Fix font size buttons (HTML entity minus broke Babel compilation) |
 | v1.6 | Firebase Auth + Firestore cloud sync; settings modal; auth in topbar |
 | v1.5 | New app icon, favicon |
 | v1.4 | Font scaling fix |

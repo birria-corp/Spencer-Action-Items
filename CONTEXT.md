@@ -17,7 +17,7 @@
 ### Spencer Action Items
 - **Repo:** `https://github.com/birria-corp/Spencer-Action-Items`
 - **Live URL:** `https://birria-corp.github.io/Spencer-Action-Items`
-- **Current version:** v1.7
+- **Current version:** v1.8
 - **Files:** `index.html`, `sw.js`, `manifest.json`, `icon-192.png`, `icon-512.png`, `icon-32.png`, `version.json`, `README.md`, `CONTEXT.md`
 - **Stack:** Single-file HTML, React 18 via Babel standalone, localStorage, PWA
 
@@ -76,6 +76,7 @@
 
 | Version | Changes |
 |---------|---------|
+| v1.8 | Fix Settings modal overlay CSS class mismatch (font buttons now work) |
 | v1.7 | Fix font size buttons (HTML entity minus broke Babel compilation) |
 | v1.6 | Firebase Auth + Firestore cloud sync; settings modal; auth in topbar |
 | v1.5 | New app icon, favicon |
