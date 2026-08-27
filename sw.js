@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.8';
+const CACHE_VERSION = '1.9';
 const CACHE_NAME = `sai-v${CACHE_VERSION}`;
 const NETWORK_FIRST = ['/index.html', '/version.json'];
 self.addEventListener('install', e => { self.skipWaiting(); });
